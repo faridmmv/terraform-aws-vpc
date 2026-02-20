@@ -3,12 +3,7 @@ resource "aws_vpc" "this" {
   enable_dns_hostnames = true
   enable_dns_support   = true
 
-  tags = merge(
-    {
-      Name = var.vpc_name
-    },
-    var.tags
-  )
+  tags = merge({ Name = var.vpc_name }, var.tags)
 }
 
 resource "aws_subnet" "this" {
@@ -17,43 +12,28 @@ resource "aws_subnet" "this" {
   availability_zone       = var.az
   map_public_ip_on_launch = var.is_public
 
-  tags = merge(
-    {
-      Name = "${var.vpc_name}-subnet"
-    },
-    var.tags
-  )
+  tags = merge({ Name = "${var.vpc_name}-subnet" }, var.tags)
 }
 
 resource "aws_internet_gateway" "this" {
   count  = var.is_public ? 1 : 0
   vpc_id = aws_vpc.this.id
 
-  tags = merge(
-    {
-      Name = "${var.vpc_name}-igw"
-    },
-    var.tags
-  )
+  tags = merge({ Name = "${var.vpc_name}-igw" }, var.tags)
 }
 
 resource "aws_route_table" "public" {
   count  = var.is_public ? 1 : 0
   vpc_id = aws_vpc.this.id
 
-  tags = merge(
-    {
-      Name = "${var.vpc_name}-public-rt"
-    },
-    var.tags
-  )
+  tags = merge({ Name = "${var.vpc_name}-public-rt" }, var.tags)
 }
 
 resource "aws_route" "internet_access" {
   count                  = var.is_public ? 1 : 0
   route_table_id         = aws_route_table.public[0].id
-  destination_cidr_block = "0.0.0.0/0" # All traffic not local goes to the IGW
-  gateway_id             = aws_internet_gateway.this.id
+  destination_cidr_block = "0.0.0.0/0"
+  gateway_id             = aws_internet_gateway.this[0].id
 }
 
 resource "aws_route_table_association" "public_association" {
