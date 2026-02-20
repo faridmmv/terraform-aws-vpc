@@ -51,7 +51,7 @@ resource "aws_route_table" "public" {
 
 resource "aws_route" "internet_access" {
   count                  = var.is_public ? 1 : 0
-  route_table_id         = aws_route_table.public.id
+  route_table_id = aws_route_table.public[0].id
   destination_cidr_block = "0.0.0.0/0" # All traffic not local goes to the IGW
   gateway_id             = aws_internet_gateway.this.id
 }
@@ -59,5 +59,5 @@ resource "aws_route" "internet_access" {
 resource "aws_route_table_association" "public_association" {
   count          = var.is_public ? 1 : 0
   subnet_id      = aws_subnet.this.id
-  route_table_id = aws_route_table.public.id
+  route_table_id = aws_route_table.public[0].id
 }
